@@ -3,7 +3,7 @@ import numpy as np
 import utm
 import matplotlib.pyplot as plt
 
-file_path = '~/Desktop/metadata_flow/4.+TSPD/testdistance.csv'
+file_path = '~/Desktop/metadata_flow/biiglereports_raw/CORAL/coral-dive3-file4.csv'
 data_frame = pd.read_csv(file_path)
 depth = data_frame['ROV.RovDepth']
 depth = depth.to_numpy()
