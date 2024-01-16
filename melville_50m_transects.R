@@ -1,80 +1,42 @@
 
-setwd("/Users/user/Desktop/metadata_flow/MELVILLE")
-
-
-# Function to cut up the route into 50m transects and save them
-process_file <- function(filename, dive_number) {
+process_file <- function(filename, dive_number, transect_count) {
   data <- read.csv(filename)
-  data$transect <- cut(data$cumulative_distance, 
-                       breaks=seq(0, max(data$cumulative_distance), by=50), 
-                       include.lowest=TRUE, 
-                       labels=FALSE)
-  list_of_transects <- split(data, data$transect)
   
-  save_path <- "/Users/user/Desktop/metadata_flow/MELVILLE/melville_50m_transects" # specify your desired path here
+  # Handle NA values in cumulative_distance, if any
+  data$cumulative_distance <- ifelse(is.na(data$cumulative_distance), 0, data$cumulative_distance)
   
-  for (i in seq_along(list_of_transects)) {
-    transect_name <- paste0("dive", dive_number, "transect", i, ".csv")
-    write.csv(list_of_transects[[i]], file = transect_name, row.names = FALSE)
-  }
-}
-
-for (filename in files_to_process) {
-  tryCatch(
-    {
-      dive_number <- gsub(".*dive([0-9]+).*", "\\1", basename(filename))
-      process_file(filename, dive_number)
-    },
-    error = function(e) {
-      cat("Error processing file:", filename, "\n")
-      cat("Error message:", conditionMessage(e), "\n")
+  # Calculate the maximum distance, ensure it's greater than zero for cut function
+  max_distance <- max(data$cumulative_distance, na.rm = TRUE)
+  if (max_distance > 0) {
+    data$transect <- cut(data$cumulative_distance, 
+                         breaks=seq(0, max_distance, by=50), 
+                         include.lowest=TRUE, 
+                         labels=FALSE)
+    list_of_transects <- split(data, data$transect)
+    
+    for (i in seq_along(list_of_transects)) {
+      transect_name <- paste0("dive", dive_number, "_transect", transect_count, ".csv")
+      write.csv(list_of_transects[[i]], file = paste0("/Users/user/Desktop/productivity_extracted/melville/melville_50m_transects/", transect_name), row.names = FALSE)
+      transect_count <- transect_count + 1
     }
-  )
-}
-
-
-files_to_process <- list.files(path = "/Users/user/Desktop/metadata_flow/MELVILLE/melville_interpolated", 
-                               pattern = "\\.csv$", 
-                               full.names = TRUE)
-
-
-# Extract dive number from filenames and process each file
-for (filename in files_to_process) {
-  dive_number <- gsub(".*dive([0-9]+).*", "\\1", basename(filename))
-  process_file(filename, dive_number)
-}
-
-setwd("/Users/user/Desktop/metadata_flow/MELVILLE/melville_interpolated")
-
-# Function to cut up the route into 50m transects and save them
-process_file <- function(filename) {
-  data <- read.csv(filename)
-  data$transect <- cut(data$cumulative_distance, 
-                       breaks=seq(0, max(data$cumulative_distance), by=50), 
-                       include.lowest=TRUE, 
-                       labels=FALSE)
-  list_of_transects <- split(data, data$transect)
-  
-  save_path <- "/Users/user/Desktop/metadata_flow/MELVILLE/melville_50m_transects" # specify your desired path here
-  
-  dive_number <- gsub(".*dive([0-9]+).*", "\\1", basename(filename))
-  file_number <- gsub(".*file([0-9]+)-.*", "\\1", basename(filename))
-  
-  for (i in seq_along(list_of_transects)) {
-    transect_name <- paste0("dive", dive_number, "file", file_number, "transect", i, ".csv")
-    write.csv(list_of_transects[[i]], file = file.path(save_path, transect_name), row.names = FALSE)
+  } else {
+    warning(paste0("No valid data in file: ", filename))
   }
+  
+  return(transect_count)
 }
 
-files_to_process <- list.files(path = "/Users/user/Desktop/metadata_flow/MELVILLE/melville_interpolated", 
+files_to_process <- list.files(path = "/Users/user/Desktop/productivity_extracted/melville/", 
                                pattern = "\\.csv$", 
                                full.names = TRUE)
 
-# Process each file
-for (filename in files_to_process) {
-  process_file(filename)
-}
+transect_count <- 1
 
+# Extract dive number and file number from filenames and process each file
+for (filename in files_to_process) {
+  dive_number <- gsub(".*dive([0-9]+).*", "\\1", basename(filename))
+  transect_count <- process_file(filename, dive_number, transect_count)
+}
 
 
 
@@ -114,6 +76,7 @@ calculate_environmental_averages <- function(df) {
   avg_salinity <- mean(df$CTD.Salinity, na.rm = TRUE)
   avg_depth <- mean(df$depth, na.rm = TRUE)
   avg_gradient <- mean(df$slope, na.rm = TRUE)
+  avg_productivity <- mean(df$PRODUCTIVITY_1, na.rm= TRUE)
   
   
   # find the most common substrate for each transect 
@@ -131,8 +94,11 @@ calculate_environmental_averages <- function(df) {
              AverageSalinity = avg_salinity, 
              AverageDepth = avg_depth, 
              AverageGradient = avg_gradient,
+             AverageProductivity = avg_productivity,
              MostCommonSubstrate = most_common_substrate)
 }
+
+
 
 
 process_transect <- function(file_path) {
@@ -148,7 +114,7 @@ process_transect <- function(file_path) {
 }
 
 # Directory containing transect files
-transect_directory <- "/Users/user/Desktop/metadata_flow/MELVILLE/melville_50m_transects"
+transect_directory <- "/Users/user/Desktop/productivity_extracted/melville/melville_50m_transects"
 # Update with your directory path
 
 transect_files <- list.files(transect_directory, full.names = TRUE)

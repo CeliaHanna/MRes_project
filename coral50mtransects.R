@@ -3,7 +3,7 @@
 library(dplyr)
 
 
-setwd("/Users/user/Desktop/metadata_flow/coral_50m_transects")
+setwd("/Users/user/Desktop/productivity_extracted/coral")
 
 # Function to cut up the route into 50m transects and save them
 process_file <- function(filename, dive_number) {
@@ -14,7 +14,7 @@ process_file <- function(filename, dive_number) {
                        labels=FALSE)
   list_of_transects <- split(data, data$transect)
   
-  save_path <- "/Users/user/Desktop/metadata_flow/coral_50m_transects" # specify your desired path here
+  save_path <- "/Users/user/Desktop/productivity_extracted/coral/coral_50m_transects" # specify your desired path here
   
   for (i in seq_along(list_of_transects)) {
     transect_name <- paste0("dive", dive_number, "transect", i, ".csv")
@@ -22,7 +22,7 @@ process_file <- function(filename, dive_number) {
   }
 }
 
-files_to_process <- list.files(path = "/Users/user/Desktop/metadata_flow/coral_interpolated", 
+files_to_process <- list.files(path = "/Users/user/Desktop/productivity_extracted/coral", 
                                pattern = "\\.csv$", 
                                full.names = TRUE)
 
@@ -34,3 +34,7 @@ for (filename in files_to_process) {
 
 # 
 # transects are now saved as CSVs in the coral_to_interpolate 
+
+
+
+

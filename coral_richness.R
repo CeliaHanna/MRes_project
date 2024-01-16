@@ -3,7 +3,6 @@
 library(vegan)
 library(ggplot2)
 
-getwd()
 
 # write a function to calculate species richness of VME morphospecies for each transect 
 
@@ -34,7 +33,8 @@ calculate_environmental_averages <- function(df) {
   avg_salinity <- mean(df$CTD.Salinity, na.rm = TRUE)
   avg_depth <- mean(df$depth, na.rm = TRUE)
   avg_gradient <- mean(df$slope, na.rm = TRUE)
-
+  avg_productivity <- mean(df$PRODUCTIVITY_1, na.rm= TRUE)
+  
   
   # find the most common substrate for each transect 
   
@@ -51,10 +51,9 @@ calculate_environmental_averages <- function(df) {
              AverageSalinity = avg_salinity, 
              AverageDepth = avg_depth, 
              AverageGradient = avg_gradient,
+             AverageProductivity = avg_productivity,
              MostCommonSubstrate = most_common_substrate)
 }
-
-
 process_transect <- function(file_path) {
   data <- read.csv(file_path)
   richness <- calculate_species_richness(data)
@@ -68,7 +67,7 @@ process_transect <- function(file_path) {
 }
 
 # Directory containing transect files
-transect_directory <- "/Users/user/Desktop/metadata_flow/CORAL/coral_50m_transects"  # Update with your directory path
+transect_directory <- "/Users/user/Desktop/productivity_extracted/coral/coral_50m_transects"  # Update with your directory path
 
 transect_files <- list.files(transect_directory, full.names = TRUE)
 transect_data <- lapply(transect_files, process_transect)

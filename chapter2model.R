@@ -10,6 +10,8 @@ all_transects <- rbind(melville_transect_summary,
 
 rownames(all_transects) <- NULL
 
+write.csv(all_transects, file = "/Users/user/Desktop/all_transects.csv", row.names = FALSE)
+
 # adding the dive column 
 
 # Assuming your dataframe is named 'your_dataframe'
@@ -98,8 +100,19 @@ library(lme4)
 library(MASS)  # For the negative binomial family
 
 # Fit a Negative Binomial GLMM tp look at richness while accounting for random effects 
-neg_binomial_glmm <- glmer.nb(Richness ~ Seamount + (1|Dive) + (1|depth_zone),
+neg_binomial_glmm <- glmer.nb(Richness ~ Seamount + (1|Dive) + (1|AverageDepth) + (1|AverageGradient),
                               data = even_rows)
+
+
+neg_binomial_glmm <- glmer.nb(Richness ~ Seamount + (1|Dive) + (1|AverageDepth),
+                              data = even_rows)
+
+neg_binomial_glmm <- glmer.nb(Richness ~ AverageTemperature + (1|Dive) + (1|AverageDepth) + (1|AverageGradient),
+                              data = all_transects)
+
+
+
+
 
 # Create a data frame from the summary table
 richness_data_binomial <- data.frame(
@@ -197,6 +210,32 @@ seamount_with_highest_Y
 
 #
 lm <- lm(Richness ~ AverageDepth, data = all_transects)
+
+
+# boxplot() for richness data 
+
+library(ggplot2)
+
+# Assuming your data is in a dataframe named 'data'
+# and the colors are defined as follows:
+colors <- c("Atlantis" = "#1f77b4", "Sapmer" = "#ff7f0e", 
+            "Melville Bank" = "#2ca02c", "Coral" = "#d62728")
+
+# Ensure the levels of the factor match the desired order
+all_transcets$Seamount <- factor(all_transects$Seamount, levels = c("Atlantis", "Sapmer", "Melville Bank", "Coral"))
+
+# Create the boxplot with ggplot2 and add error bars with horizontal caps
+ggplot(all_transects, aes(x = Seamount, y = Richness, fill = Seamount)) +
+  geom_boxplot() +
+  geom_errorbar(aes(ymin = ..lower.., ymax = ..upper..), width = 0.2, stat = "boxplot") +
+  scale_fill_manual(values = colors) +
+  theme_minimal() +
+  labs(title = "Average Richness by Seamount",
+       x = "Seamount",
+       y = "Richness") +
+  theme(legend.position = "none") # Remove the legend if not needed
+
+
 
 
 

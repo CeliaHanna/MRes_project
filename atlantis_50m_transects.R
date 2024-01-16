@@ -15,7 +15,7 @@ process_file <- function(filename, dive_number, transect_count) {
     
     for (i in seq_along(list_of_transects)) {
       transect_name <- paste0("dive", dive_number, "_transect", transect_count, ".csv")
-      write.csv(list_of_transects[[i]], file = paste0("/Users/user/Desktop/metadata_flow/atlantis_50m_transects/", transect_name), row.names = FALSE)
+      write.csv(list_of_transects[[i]], file = paste0("/Users/user/Desktop/productivity_extracted/atlantis/atlantis_50m_transects/", transect_name), row.names = FALSE)
       transect_count <- transect_count + 1
     }
   } else {
@@ -25,7 +25,7 @@ process_file <- function(filename, dive_number, transect_count) {
   return(transect_count)
 }
 
-files_to_process <- list.files(path = "/Users/user/Desktop/metadata_flow/atlantis_interpolated", 
+files_to_process <- list.files(path = "/Users/user/Desktop/productivity_extracted/atlantis/", 
                                pattern = "\\.csv$", 
                                full.names = TRUE)
 
@@ -72,6 +72,7 @@ calculate_environmental_averages <- function(df) {
   avg_salinity <- mean(df$CTD.Salinity, na.rm = TRUE)
   avg_depth <- mean(df$depth, na.rm = TRUE)
   avg_gradient <- mean(df$slope, na.rm = TRUE)
+  avg_productivity <- mean(df$PRODUCTIVITY_1, na.rm= TRUE)
   
   
   # find the most common substrate for each transect 
@@ -89,6 +90,7 @@ calculate_environmental_averages <- function(df) {
              AverageSalinity = avg_salinity, 
              AverageDepth = avg_depth, 
              AverageGradient = avg_gradient,
+             AverageProductivity = avg_productivity,
              MostCommonSubstrate = most_common_substrate)
 }
 
@@ -98,7 +100,6 @@ process_transect <- function(file_path) {
   richness <- calculate_species_richness(data)
   abundance <- calculate_species_abundance(data)
   env_averages <- calculate_environmental_averages(data)
-  
   transect_info <- basename(file_path)  # Extract transect information
   
   # Combine richness and environmental averages
@@ -106,7 +107,7 @@ process_transect <- function(file_path) {
 }
 
 # Directory containing transect files
-transect_directory <- "/Users/user/Desktop/metadata_flow/ATLANTIS/atlantis_50m_transects"
+transect_directory <- "/Users/user/Desktop/productivity_extracted/atlantis/atlantis_50m_transects"
 # Update with your directory path
 
 transect_files <- list.files(transect_directory, full.names = TRUE)
